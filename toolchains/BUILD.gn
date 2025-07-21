@@ -13,44 +13,48 @@ toolchain("host") {
     cxx = toolchain_args.cxx
   }
 
-  # cc 和 cxx 工具保持不变，因为它们工作正常
+  # 编译 C 文件
   tool("cc") {
     depfile = "{{output}}.d"
     command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
     description = "CC {{output}}"
-    outputs = [ "{{source_out_dir}}/{{source_name_part}}.o" ]
+    outputs = [ "{{root_out_dir}}/obj/{{source_name_part}}.o" ]
     depsformat = "gcc"
   }
 
+  # 编译 C++ 文件
   tool("cxx") {
     depfile = "{{output}}.d"
     command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
     description = "CXX {{output}}"
-    outputs = [ "{{source_out_dir}}/{{source_name_part}}.o" ]
+    outputs = [ "{{root_out_dir}}/obj/{{source_name_part}}.o" ]
     depsformat = "gcc"
   }
 
-  # 修改 link、stamp 和 copy 工具
+  # 链接可执行文件
   tool("link") {
-    command = "$cxx {{ldflags}} {{inputs}} {{solibs}} {{libs}} -o {{target_output_name}}{{output_extension}}"
-    description = "LINK {{target_output_name}}{{output_extension}}"
-    outputs = [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
-    default_output_dir = "{{root_out_dir}}"
+    command = "$cxx {{ldflags}} {{inputs}} {{solibs}} {{libs}} -o {{output}}"
+    description = "LINK {{output}}"
+    outputs = [ "{{root_out_dir}}/bin/{{target_output_name}}{{output_extension}}" ]
+    default_output_dir = "{{root_out_dir}}/bin"
   }
 
-  tool("stamp") {
-    command = "touch {{target_output_name}}.stamp"
-    description = "STAMP {{target_output_name}}.stamp"
+  # 静态库
+  tool("alink") {
+    command = "ar crs {{output}} {{inputs}}"
+    description = "ALINK {{output}}"
+    outputs = [ "{{root_out_dir}}/lib/{{target_output_name}}.a" ]
   }
 
+  # copy 工具
   tool("copy") {
     command = "cp -af {{source}} {{target_out_dir}}"
     description = "COPY {{source}} to {{target_out_dir}}"
   }
 
-  tool("alink") {
-    command = "ar crs {{output}} {{inputs}}"
-    description = "ALINK {{output}}"
-    outputs = [ "{{target_out_dir}}/{{target_output_name}}.a" ]  # 使用正确的模板变量组合
+  # stamp 工具
+  tool("stamp") {
+    command = "touch {{output}}"
+    description = "STAMP {{output}}"
   }
 }
