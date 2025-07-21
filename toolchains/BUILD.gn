@@ -1,0 +1,56 @@
+toolchain("host") {
+  toolchain_args = {
+    cc = getenv("CC")
+    cxx = getenv("CXX")
+  }
+
+  cc = "gcc"
+  cxx = "g++"
+  if (toolchain_args.cc != "") {
+    cc = toolchain_args.cc
+  }
+  if (toolchain_args.cxx != "") {
+    cxx = toolchain_args.cxx
+  }
+
+  # cc 和 cxx 工具保持不变，因为它们工作正常
+  tool("cc") {
+    depfile = "{{output}}.d"
+    command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+    description = "CC {{output}}"
+    outputs = [ "{{source_out_dir}}/{{source_name_part}}.o" ]
+    depsformat = "gcc"
+  }
+
+  tool("cxx") {
+    depfile = "{{output}}.d"
+    command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
+    description = "CXX {{output}}"
+    outputs = [ "{{source_out_dir}}/{{source_name_part}}.o" ]
+    depsformat = "gcc"
+  }
+
+  # 修改 link、stamp 和 copy 工具
+  tool("link") {
+    command = "$cxx {{ldflags}} {{inputs}} {{solibs}} {{libs}} -o {{target_output_name}}{{output_extension}}"
+    description = "LINK {{target_output_name}}{{output_extension}}"
+    outputs = [ "{{target_out_dir}}/{{target_output_name}}{{output_extension}}" ]
+    default_output_dir = "{{root_out_dir}}"
+  }
+
+  tool("stamp") {
+    command = "touch {{target_output_name}}.stamp"
+    description = "STAMP {{target_output_name}}.stamp"
+  }
+
+  tool("copy") {
+    command = "cp -af {{source}} {{target_out_dir}}"
+    description = "COPY {{source}} to {{target_out_dir}}"
+  }
+
+  tool("alink") {
+    command = "ar crs {{output}} {{inputs}}"
+    description = "ALINK {{output}}"
+    outputs = [ "{{target_out_dir}}/{{target_output_name}}.a" ]  # 使用正确的模板变量组合
+  }
+}

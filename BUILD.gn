@@ -1,0 +1,13 @@
+executable("main") {
+  sources = [ "main.cpp" ]
+  deps = [ ":hello" ]
+  include_dirs = [ "include" ]
+  configs = [ "//build/config:default_cflags" ]
+}
+
+static_library("hello") {
+  sources = [ "src/hello/hello.cpp" ]
+  public = [ "include/hello/hello.h" ]
+  include_dirs = [ "include" ]
+  configs = [ "//build/config:default_cflags" ]
+}
