@@ -5,3 +5,12 @@ config("default_cflags") {
     "-std=c++17",
   ]
 }
+
+config("shared_library_cflags"){
+  cflags = [
+    "-Wall",
+    "-Wextra",
+    "-std=c++17",
+    "-fPIC"
+  ]
+}

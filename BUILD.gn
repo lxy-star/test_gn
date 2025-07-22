@@ -1,13 +1,24 @@
 executable("main") {
   sources = [ "main.cpp" ]
-  deps = [ ":hello" ]
+  deps = [ ":hello_static" ]  # 或切换为 :hello_static 测试
   include_dirs = [ "include" ]
   configs = [ "//build/config:default_cflags" ]
 }
 
-static_library("hello") {
+# 静态库
+static_library("hello_static") {
+  output_name = "hello"  # 输出 libhello.a
   sources = [ "src/hello/hello.cpp" ]
   public = [ "include/hello/hello.h" ]
   include_dirs = [ "include" ]
   configs = [ "//build/config:default_cflags" ]
+}
+
+# 动态库
+shared_library("hello_shared") {
+  output_name = "hello"  # 输出 libhello.so
+  sources = [ "src/hello/hello.cpp" ]
+  public = [ "include/hello/hello.h" ]
+  include_dirs = [ "include" ]
+  configs = [ "//build/config:shared_library_cflags" ]
 }

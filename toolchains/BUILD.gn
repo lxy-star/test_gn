@@ -13,25 +13,22 @@ toolchain("host") {
     cxx = toolchain_args.cxx
   }
 
-  # 编译 C 文件
   tool("cc") {
     depfile = "{{output}}.d"
     command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
     description = "CC {{output}}"
-    outputs = [ "{{root_out_dir}}/obj/{{source_name_part}}.o" ]
+    outputs = [ "{{root_out_dir}}/obj/{{label_no_toolchain}}/{{source_name_part}}.o" ]
     depsformat = "gcc"
   }
 
-  # 编译 C++ 文件
   tool("cxx") {
     depfile = "{{output}}.d"
     command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
     description = "CXX {{output}}"
-    outputs = [ "{{root_out_dir}}/obj/{{source_name_part}}.o" ]
+    outputs = [ "{{root_out_dir}}/obj/{{label_no_toolchain}}/{{source_name_part}}.o" ]
     depsformat = "gcc"
   }
 
-  # 链接可执行文件
   tool("link") {
     command = "$cxx {{ldflags}} {{inputs}} {{solibs}} {{libs}} -o {{output}}"
     description = "LINK {{output}}"
@@ -39,20 +36,25 @@ toolchain("host") {
     default_output_dir = "{{root_out_dir}}/bin"
   }
 
-  # 静态库
   tool("alink") {
     command = "ar crs {{output}} {{inputs}}"
     description = "ALINK {{output}}"
-    outputs = [ "{{root_out_dir}}/lib/{{target_output_name}}.a" ]
+    outputs = [ "{{root_out_dir}}/lib/lib{{target_output_name}}.a" ]
+    default_output_dir = "{{root_out_dir}}/lib"
   }
 
-  # copy 工具
+  tool("solink") {
+    command = "$cxx -shared {{ldflags}} {{inputs}} {{solibs}} {{libs}} -o {{output}}"
+    description = "SOLINK {{output}}"
+    outputs = [ "{{root_out_dir}}/lib/lib{{target_output_name}}.so" ]
+    default_output_dir = "{{root_out_dir}}/lib"
+  }
+
   tool("copy") {
     command = "cp -af {{source}} {{target_out_dir}}"
     description = "COPY {{source}} to {{target_out_dir}}"
   }
 
-  # stamp 工具
   tool("stamp") {
     command = "touch {{output}}"
     description = "STAMP {{output}}"

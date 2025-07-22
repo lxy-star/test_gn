@@ -1,17 +1,17 @@
-# 安装依赖
-sudo apt update
-sudo apt install -y python3 git g++ pkg-config ninja-build
+#!/bin/bash
 
-# 克隆 GN 仓库
-mkdir -p ~/tools && cd ~/tools
-git clone https://gn.googlesource.com/gn
-cd gn
+#pip install conan
+#conan remote add myremote https://api.bintray.com/conan/myuser/myrepo
 
-# 生成 Ninja 构建文件
-python3 build/gen.py
+# 构建项目
+gn gen out/debug
+ninja -C out/debug
 
-# 构建 GN
-ninja -C out
-
-# 软链接到系统路径（可选）
-sudo ln -sf "$(pwd)/out/gn" /usr/local/bin/gn
+# Conan 打包和上传
+if [ "$1" == "upload" ]; then
+    # 创建 Conan 包
+    conan create .
+    
+    # 上传到远程仓库
+    conan upload hello/1.0.0 -r myremote --all
+fi
